@@ -3,16 +3,16 @@ import { User } from '../interface';
 
 type UserState = {
   loading: 'idle' | 'pending' | 'succeeded' | 'failed';
-  user: User | null;
+  userInfo: User | null;
 };
 
 const initialState: UserState = {
   loading: 'idle',
-  user: null,
+  userInfo: null,
 };
 
-const fetchUser = createAsyncThunk<User>('user/GET_USER', async () => {
-  const response = await fetch('https://dummyjson.com/users/1');
+export const fetchUser = createAsyncThunk<User, number>('user/GET_USER', async (userId: number) => {
+  const response = await fetch(`https://dummyjson.com/users/${userId}`);
   const data: User = await response.json();
 
   return data;
@@ -24,7 +24,7 @@ const userSlice = createSlice({
   reducers: {
     logout: state => {
       state.loading = 'idle';
-      state.user = null;
+      state.userInfo = null;
     },
   },
   extraReducers: builder => {
@@ -34,13 +34,15 @@ const userSlice = createSlice({
 
     builder.addCase(fetchUser.fulfilled, (state, action) => {
       state.loading = 'succeeded';
-      state.user = action.payload;
+      state.userInfo = action.payload;
     });
 
     builder.addCase(fetchUser.rejected, state => {
       state.loading = 'failed';
+      state.userInfo = null;
     });
   },
 });
 
 export default userSlice.reducer;
+export const { logout } = userSlice.actions;
